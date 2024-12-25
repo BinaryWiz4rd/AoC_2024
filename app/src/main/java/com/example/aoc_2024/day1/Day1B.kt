@@ -29,10 +29,12 @@ fun main() {
                 }
             }
         }
-
+// idea: https://stackoverflow.com/questions/64692293/how-to-count-number-of-occurences-of-items-in-an-array-in-kotlin
+        // work: https://kotlinlang.org/docs/collections-overview.html
         var similarityScore = 0
         for (i in leftSide) {
-            //tu cos pomyslec jakby tu elegancko zrobic
+            val occurrences = rightSide.count {it==i}
+            similarityScore += i * occurrences
         }
 
         println("similarity score: $similarityScore")
