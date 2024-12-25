@@ -8,7 +8,8 @@ import kotlin.math.abs
 fun main() {
     // https://kotlinlang.org/docs/kotlin-doc.html#kdoc-syntax
     /**
-     * Here we had to search through left and right-hand side of a file:
+     * Here we had to search through left and right-hand side of a file, that looked somewhat like
+     * this:
      *         3   4
      *         4   3
      *         2   5
