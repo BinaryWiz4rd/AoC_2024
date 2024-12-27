@@ -3,54 +3,57 @@ package com.example.aoc_2024.day4
 import java.io.File
 
 fun main() {
-    // Read the grid from a text file
-    val input = File("C:\\Users\\aniaa\\Repositories\\AoC_2024\\app\\src\\main\\java\\com\\example\\aoc_2024\\day4\\day4_sample.txt")
-        .readLines().map { it.trim() }
+    /*
+    idea: https://www.youtube.com/watch?v=0ekhKsd_YYA
+    Last year, i did this type of problem by using countless loops which was terrible.
+    But i had no idea how to solve that problem in other way, so i watched this video, that
+    has helped me to discover a different, and more elegant way.
 
-    val word = "XMAS"
-    var count = 0
+    Idea is the following: Make it possible to read it always from left to right.
+    So we use different functions maps have, i.e if we want to look for XMAS from right to left,
+    we simply reverse the input matrix we have. And so on.
+     */
+    val input =
+        File("C:\\Users\\aniaa\\Repositories\\AoC_2024\\app\\src\\main\\java\\com\\example\\aoc_2024\\day4\\day4_sample.txt")
+            .readLines().map { it.trim() }
 
-    val rightRow = 0
-    val rightCol = 1
-    val leftRow = 0
-    val leftCol = -1
-    val downRow = 1
-    val downCol = 0
-    val upRow = -1
-    val upCol = 0
-    val downRightRow = 1
-    val downRightCol = 1
-    val upLeftRow = -1
-    val upLeftCol = -1
-    val downLeftRow = 1
-    val downLeftCol = -1
-    val upRightRow = -1
-    val upRightCol = 1
+    fun partA (input:List<String>):Int{
+        val leftToRight: List<String> = input
+        val rightToLeft: List<String> = input.map {it.reversed()}
+        val topToBottom: List<String> = input.pivot()
+        val bottomToTop: List<String> = topToBottom.map {it.reversed()}
 
-    for (row in input.indices) {
-        for (column in input[row].indices) {
-            if (checkWord(input, word, row, column, rightRow, rightCol)) count++
-            if (checkWord(input, word, row, column, leftRow, leftCol)) count++
-            if (checkWord(input, word, row, column, downRow, downCol)) count++
-            if (checkWord(input, word, row, column, upRow, upCol)) count++
-            if (checkWord(input, word, row, column, downRightRow, downRightCol)) count++
-            if (checkWord(input, word, row, column, upLeftRow, upLeftCol)) count++
-            if (checkWord(input, word, row, column, downLeftRow, downLeftCol)) count++
-            if (checkWord(input, word, row, column, upRightRow, upRightCol)) count++
-        }
+        val BottomLeftToTopRight: List<String> = input.tippedRight()
+        val TopRightToBottomLeft: List<String> = BottomLeftToTopRight.map {it.reversed()}
+        val TopLeftToBottomRight: List<String> = input.tippedLeft()
+        val BottomRightToTopLeft: List<String> = TopLeftToBottomRight.map {it.reversed()}
+
+        val all: List<String> = leftToRight + rightToLeft + topToBottom + bottomToTop +
+                BottomLeftToTopRight+TopRightToBottomLeft+TopLeftToBottomRight+BottomRightToTopLeft
+
+        return all.sumOf {Regex("XMAS").findAll(it).count() }
     }
-    println("XMAS counter: $count")
+
+    fun pivot (input:List<String>): List<String> {
+        /*
+        We go through all columns (y), and we append all of them in the inner loop,
+        same about rows (x).
+         */
+        val characters: List<String> = this
+        return buildList {this: MutableList<String>
+        for (x: Int in characters[0].indices){
+            add(buildString { this: StringBuilder
+            for (y:Int in characters.indices){
+                append(characters[y][x])
+            }
+            })
+        }
+        }
+
+    }
+
+    fun List<String>.tippedRight(): List<String> {
+
+    }
 }
 
-fun checkWord(grid: List<String>, word: String, row: Int, column: Int, rowDirection: Int, columnDirection: Int): Boolean {
-    for (i in word.indices) {
-        val rowMove = row + i * rowDirection
-        val columnMove = column + i * columnDirection
-
-        //tu nie dziala lol
-        if (grid[rowMove][columnMove] != word[i]) {
-            return false
-        }
-    }
-    return true
-}
