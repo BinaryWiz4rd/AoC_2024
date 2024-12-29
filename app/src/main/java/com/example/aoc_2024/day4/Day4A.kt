@@ -2,7 +2,7 @@ package com.example.aoc_2024.day4
 
 import java.io.File
 /*
-CODE AND EXPLANATION STARTS IN MAIN, pivot, and tipped are here, bc they have to be accessed globally
+CODE AND EXPLANATION STARTS IN MAIN, pivotB, and tipped are here, bc they have to be accessed globally
  */
 fun List<String>.pivot(): List<String> {
     /*
