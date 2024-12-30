@@ -1,149 +1,89 @@
 package com.example.aoc_2024.day6
 
-fun day6A(map: Array<String>, startRow: Int, startCol: Int, startDir: Char): Int {
+import java.io.File
 
-    val visited = mutableSetOf<Pair<Int, Int>>()
-
-    var currentRow = startRow
-    var currentCol = startCol
-    var currentDir = startDir
-
-    var step = 0
-
-    // nasz guard nie moze wylezc z mapy, wiec robimy puki jest w niej
-    while (currentRow in map.indices && currentCol in map[0].indices) {
-
-        visited.add(Pair(currentRow, currentCol))
-
-        // patrzymy czy moze wlezc, czy moze jest tam '#'
-        when (currentDir) {
-            '^' -> if (currentRow > 0 && map[currentRow - 1][currentCol] == '#') currentDir = '>'
-            // jesli tam jest, to prawo i tak dalej
-            '>' -> if (currentCol < map[0].length - 1 && map[currentRow][currentCol + 1] == '#') currentDir = 'v'
-            'v' -> if (currentRow < map.size - 1 && map[currentRow + 1][currentCol] == '#') currentDir = '<'
-            '<' -> if (currentCol > 0 && map[currentRow][currentCol - 1] == '#') currentDir = '^'
-        }
-
-        // tu jest przemieszczenie sie (jesli jest within bounds)
-        when (currentDir) {
-            '^' -> if (currentRow > 0) currentRow -= 1
-            '>' -> if (currentCol < map[0].length - 1) currentCol += 1
-            'v' -> if (currentRow < map.size - 1) currentRow += 1
-            '<' -> if (currentCol > 0) currentCol -= 1
-        }
-
-        step++
-
-        // pomyslec jak to naprawic, bo inaczej nie robi mi outputu
-        if (step > 1000) {
-            break
+fun findSign(grid: Array<String>, signs: CharArray): Pair<Int, Int>? {
+    for (i in grid.indices) {
+        for (j in grid[i].indices) {
+            if (grid[i][j] in signs) {
+                return Pair(i, j)
+            }
         }
     }
-    return visited.size
+    return null
+}
+
+fun moveGuard(grid: Array<String>, position: Pair<Int, Int>, sign: Char): Pair<Int, Int> {
+    var (row, col) = position
+
+    when (sign) {
+        '^' -> if (row > 0) row--
+        '>' -> if (col < grid[row].length - 1) col++
+        '<' -> if (col > 0) col--
+        'v' -> if (row < grid.size - 1) row++
+    }
+
+    return Pair(row, col)
+}
+
+fun printGrid(grid: Array<String>) {
+    for (row in grid) {
+        println(row)
+    }
+}
+
+fun traverse(grid: Array<String>, start: Pair<Int, Int>, signAtStart: Char) {
+    var currentLocation = start
+    var currentSign = signAtStart
+    var gridList = grid.map { it.toCharArray() }.toMutableList()
+
+    var moveCount = 0
+    while (true) {
+        gridList[currentLocation.first][currentLocation.second] = 'X'
+
+        currentLocation = moveGuard(grid, currentLocation, currentSign)
+        // on sie nie rusza, ta petla dziala tylko raz
+        //potem dodac zeby mi skrecal bo mi nie skreca, czyli zeby nie drukowal mi println
+        if (currentLocation.first < 0 || currentLocation.first >= grid.size ||
+            currentLocation.second < 0 || currentLocation.second >= grid[currentLocation.first].length ||
+            grid[currentLocation.first][currentLocation.second] == '#') {
+            println("guard stopped at: $currentLocation (out of bounds or hit a wall)")
+            break
+        }
+
+        currentSign = grid[currentLocation.first][currentLocation.second]
+
+        gridList[currentLocation.first][currentLocation.second] = 'G'
+
+        val updatedGrid = gridList.map { it.concatToString() }.toTypedArray()
+        println("move #$moveCount:")
+        printGrid(updatedGrid)
+
+        moveCount++
+        Thread.sleep(500)
+    }
 }
 
 fun main() {
-    val map = arrayOf(
-        "....#.....",
-        ".........#",
-        "..........",
-        "..#.......",
-        ".......#..",
-        "..........",
-        ".#..^.....",
-        "........#.",
-        "#.........",
-        "......#..."
-    )
+    val input = File("C:\\Users\\aniaa\\Repositories\\AoC_2024\\app\\src\\main\\java\\com\\example\\aoc_2024\\day6\\day6_sample.txt")
+        .readLines()
+        .map { it.trim() }
 
-    // szukamy starter pointu (marked with '^')
-    var startRow = -1
-    var startCol = -1
-    var startDir = '^'
-    for (row in map.indices) {
-        for (col in map[row].indices) {
-            if (map[row][col] == '^') {
-                startRow = row
-                startCol = col
-                startDir = '^'
-                break
-            }
-        }
-        if (startRow != -1) break
+    val grid = input.toTypedArray()
+    val signs = charArrayOf('^', '>', '<', 'v')
+
+    val initialLocation = findSign(grid, signs)
+    if (initialLocation != null) {
+        var currentLocation = initialLocation
+
+        println("initial grid:")
+        printGrid(grid)
+        println("location of Guard: $currentLocation\n")
+
+        val signAtStart = grid[currentLocation.first][currentLocation.second]
+
+        traverse(grid, initialLocation, signAtStart)
+    } else {
+        println()
     }
-
-    val result = day6A(map, startRow, startCol, startDir)
-    println("amount of guard's visiting districts: $result")
 }
-
-// inspiracja do poprawki bledow
-//package com.example.aoc_2024.day6
-//
-//fun day6A(map: Array<String>, startRow: Int, startCol: Int, startDir: Char): Int {
-//    val visited = mutableSetOf<Pair<Int, Int>>()
-//    var currentRow = startRow
-//    var currentCol = startCol
-//    var currentDir = startDir
-//
-//    // Direction vectors for '^', '>', 'v', '<'
-//    val directionVectors = mapOf(
-//        '^' to Pair(-1, 0),
-//        '>' to Pair(0, 1),
-//        'v' to Pair(1, 0),
-//        '<' to Pair(0, -1)
-//    )
-//
-//    // Direction order for turning right
-//    val directions = listOf('^', '>', 'v', '<')
-//
-//    while (currentRow in map.indices && currentCol in map[0].indices) {
-//        visited.add(Pair(currentRow, currentCol))
-//
-//        // Check for obstacle in front
-//        val (deltaRow, deltaCol) = directionVectors[currentDir]!!
-//        if (currentRow + deltaRow in map.indices && currentCol + deltaCol in map[0].indices &&
-//            map[currentRow + deltaRow][currentCol + deltaCol] == '#') {
-//            // Turn right
-//            currentDir = directions[(directions.indexOf(currentDir) + 1) % 4]
-//        } else {
-//            // Move forward
-//            currentRow += deltaRow
-//            currentCol += deltaCol
-//        }
-//    }
-//
-//    return visited.size
-//}
-//
-//fun main() {
-//    val map = arrayOf(
-//        "....#.....",
-//        ".........#",
-//        "..........",
-//        "..#.......",
-//        ".......#..",
-//        "..........",
-//        ".#..^.....",
-//        "........#.",
-//        "#.........",
-//        "......#..."
-//    )
-//
-//    // Find the starting point
-//    var startRow = -1
-//    var startCol = -1
-//    for (row in map.indices) {
-//        for (col in map[row].indices) {
-//            if (map[row][col] == '^') {
-//                startRow = row
-//                startCol = col
-//                break
-//            }
-//        }
-//        if (startRow != -1) break
-//    }
-//
-//    val result = day6A(map, startRow, startCol, '^')
-//    println("Amount of guard's visiting districts: $result")
-//}
-
